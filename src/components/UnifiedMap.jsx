@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, Tooltip } from 'react
 import L from 'leaflet';
 import { Truck, Thermometer, Zap, ShieldCheck, Navigation, Filter } from 'lucide-react';
 
-// Custom Map Marker Icons using SVG Data URIs
+// Custom Map Marker Icons using SVG Data URIs (UTF-8 safe)
 const createCustomIcon = (color, label) => {
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="36" height="42" viewBox="0 0 36 42">
@@ -16,7 +16,7 @@ const createCustomIcon = (color, label) => {
     </svg>
   `;
   return L.icon({
-    iconUrl: `data:image/svg+xml;base64,${btoa(svg)}`,
+    iconUrl: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`,
     iconSize: [36, 42],
     iconAnchor: [18, 42],
     popupAnchor: [0, -38]
