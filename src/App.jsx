@@ -46,33 +46,53 @@ export default function App() {
       .catch(console.error);
   }, []);
 
-  // Server-Sent Events (SSE) Live Telemetry Stream Connection
+  // Server-Sent Events (SSE) & Polling Fallback for Vercel Serverless
   useEffect(() => {
-    const eventSource = new EventSource('/api/live-stream');
+    let eventSource = null;
 
-    eventSource.onopen = () => {
-      setIsLiveStreamConnected(true);
-    };
+    try {
+      eventSource = new EventSource('/api/live-stream');
 
-    eventSource.onmessage = (event) => {
-      try {
-        const payload = JSON.parse(event.data);
-        if (payload.type === 'INIT' || payload.type === 'TELEMETRY_UPDATE') {
-          setShipments(payload.shipments);
-        } else if (payload.type === 'NEW_SHIPMENT') {
-          setShipments(prev => [payload.shipment, ...prev]);
+      eventSource.onopen = () => {
+        setIsLiveStreamConnected(true);
+      };
+
+      eventSource.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          if (payload.type === 'INIT' || payload.type === 'TELEMETRY_UPDATE') {
+            setShipments(payload.shipments);
+          } else if (payload.type === 'NEW_SHIPMENT') {
+            setShipments(prev => [payload.shipment, ...prev]);
+          }
+        } catch (err) {
+          console.error("SSE parse error", err);
         }
-      } catch (err) {
-        console.error("SSE parse error", err);
-      }
-    };
+      };
 
-    eventSource.onerror = () => {
+      eventSource.onerror = () => {
+        setIsLiveStreamConnected(false);
+      };
+    } catch (e) {
       setIsLiveStreamConnected(false);
-    };
+    }
+
+    // Polling Ticker Fallback for Vercel Serverless environment
+    const pollInterval = setInterval(() => {
+      fetch('/api/shipments')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setShipments(data.data);
+            setIsLiveStreamConnected(true);
+          }
+        })
+        .catch(() => {});
+    }, 4000);
 
     return () => {
-      eventSource.close();
+      if (eventSource) eventSource.close();
+      clearInterval(pollInterval);
     };
   }, []);
 
