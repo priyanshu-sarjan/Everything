@@ -9,11 +9,23 @@ import NewShipmentModal from './components/NewShipmentModal';
 import ShipmentDetailModal from './components/ShipmentDetailModal';
 import AnalyticsESG from './components/AnalyticsESG';
 import confetti from 'canvas-confetti';
+import { INITIAL_SHIPMENTS } from '../server/data/shipmentsData.js';
+import { INDIAN_LOGISTICS_CORRIDORS } from '../server/data/routesData.js';
 
 export default function App() {
-  const [shipments, setShipments] = useState([]);
-  const [corridors, setCorridors] = useState([]);
-  const [analyticsData, setAnalyticsData] = useState(null);
+  const [shipments, setShipments] = useState(INITIAL_SHIPMENTS);
+  const [corridors, setCorridors] = useState(INDIAN_LOGISTICS_CORRIDORS);
+  const [analyticsData, setAnalyticsData] = useState({
+    totalActiveShipments: 6,
+    tier1AgriFreshActive: 3,
+    foodSpoilagePreventedTons: 1428.5,
+    foodWasteReductionPercent: 99.4,
+    avgColdChainTempVarianceC: 0.3,
+    greenCorridorBypassAvgSavedMins: 48,
+    microTransitDispatches24h: 3840,
+    carbonOffsetCo2Tons: 612.4,
+    nationalSupplyChainHealthScore: 98.7
+  });
   const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'agrifresh', 'micro', 'shipments'
   const [isLiveStreamConnected, setIsLiveStreamConnected] = useState(false);
 
